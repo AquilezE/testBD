@@ -1,0 +1,61 @@
+DROP database tintoreria;
+
+SOURCE C:/Users/52228/Documents/ProjectoSQL/model.sql;
+
+DELIMITER $
+
+CREATE PROCEDURE InsertarCliente(
+    IN p_paterno VARCHAR(10),
+    IN p_materno VARCHAR(10),
+    IN p_nombre VARCHAR(10),
+    IN p_calle VARCHAR(20),
+    IN p_colonia VARCHAR(15),
+    IN p_localidad VARCHAR(15),
+    IN p_telefono VARCHAR(10)
+)
+BEGIN
+    DECLARE nombre_completo VARCHAR(30);
+    SET nombre_completo = CONCAT(p_paterno," ", p_materno," ", p_nombre);
+
+    IF NOT EXISTS (SELECT 1 FROM Clientes WHERE CONCAT(paterno, materno, nombre) = nombre_completo) THEN
+        INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+        VALUES (p_paterno, p_materno, p_nombre, p_calle, p_colonia, p_localidad, p_telefono);
+
+        INSERT INTO UpdateLog (operacion, nombre_completo, fecha_hora)
+        VALUES ('Insercion', nombre_completo, CURRENT_TIMESTAMP);
+    END IF;
+END $
+
+DELIMITER ;
+
+SOURCE C:/Users/52228/Documents/ProjectoSQL/databackup.sql;
+
+SELECT * FROM VistaTotalServicio;
+
+
+SELECT e.noPersonal,e.nombre,e.paterno,e.materno,e.turno
+FROM Empleados e
+WHERE e.idPuestos = 3
+AND NOT EXISTS (
+    SELECT 1
+    FROM Servicio s
+    WHERE s.noPersonal = e.noPersonal
+);
+
+SELECT
+    s.folio,
+    s.fecha AS fecha_servicio,
+    c.nombre AS nombre_cliente,
+    c.paterno AS paterno_cliente,
+    c.materno AS materno_cliente,
+    e.nombre AS nombre_empleado,
+    e.paterno AS paterno_empleado,
+    e.materno AS materno_empleado
+FROM
+    Servicio s
+JOIN
+    Clientes c ON s.idCliente = c.idCliente
+JOIN
+    Empleados e ON s.noPersonal = e.noPersonal
+WHERE
+    s.folio = 1;
