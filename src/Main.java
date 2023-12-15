@@ -18,8 +18,10 @@ public class Main extends javax.swing.JFrame {
      */
     public Main(String username) {
         initComponents(username);
+        this.user=username;
         setVisible(true);
     }
+    String user;
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -84,16 +86,15 @@ public class Main extends javax.swing.JFrame {
 
     //Consultas
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-        new Consultas();
+        new Consultas(user);
         dispose();
     }
 
     //Clientes
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-        new Clientes();
+        new Clientes(user);
         dispose();
     }
-
 
 
     /**

@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 
@@ -12,16 +13,18 @@ import java.sql.*;
  */
 public class Consultas extends javax.swing.JFrame {
 
+    String nombre;
     private static final String URL = "jdbc:mysql://localhost:3306/tintoreria";
     private static final String USER = "root";
     private static final String PASSWORD = "kekistan";
 
-    public Consultas() {
+    public Consultas(String nombre) {
         initComponents();
+        this.nombre=nombre;
         setVisible(true);
     }
 
-    private void extraerFolios(int folioP) {
+    private void extraerFolios(String folioP) {
         // Load the MySQL JDBC driver
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -33,26 +36,46 @@ public class Consultas extends javax.swing.JFrame {
 
         // Establish a connection to the database
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            // Prepare the stored procedure call
 
+            // Prepare the stored procedure call
             Statement st= connection.createStatement();
-            String consultaFolio = String.format("SELECT\n" +
-                    "    s.folio,\n" +
-                    "    s.fecha AS fecha_servicio,\n" +
-                    "    c.nombre AS nombre_cliente,\n" +
-                    "    c.paterno AS paterno_cliente,\n" +
-                    "    c.materno AS materno_cliente,\n" +
-                    "    e.nombre AS nombre_empleado,\n" +
-                    "    e.paterno AS paterno_empleado,\n" +
-                    "    e.materno AS materno_empleado\n" +
-                    "FROM\n" +
-                    "    Servicio s\n" +
-                    "JOIN\n" +
-                    "    Clientes c ON s.idCliente = c.idCliente\n" +
-                    "JOIN\n" +
-                    "    Empleados e ON s.noPersonal = e.noPersonal\n" +
-                    "WHERE\n" +
-                    "    s.folio = %d;",folioP);
+            String consultaFolio;
+            if (folioP.equals("")){
+                consultaFolio = "SELECT\n" +
+                        "    s.folio,\n" +
+                        "    s.fecha AS fecha_servicio,\n" +
+                        "    c.nombre AS nombre_cliente,\n" +
+                        "    c.paterno AS paterno_cliente,\n" +
+                        "    c.materno AS materno_cliente,\n" +
+                        "    e.nombre AS nombre_empleado,\n" +
+                        "    e.paterno AS paterno_empleado,\n" +
+                        "    e.materno AS materno_empleado\n" +
+                        "FROM\n" +
+                        "    Servicio s\n" +
+                        "JOIN\n" +
+                        "    Clientes c ON s.idCliente = c.idCliente\n" +
+                        "JOIN\n" +
+                        "    Empleados e ON s.noPersonal = e.noPersonal;";
+            }else {
+                consultaFolio = String.format("SELECT\n" +
+                        "    s.folio,\n" +
+                        "    s.fecha AS fecha_servicio,\n" +
+                        "    c.nombre AS nombre_cliente,\n" +
+                        "    c.paterno AS paterno_cliente,\n" +
+                        "    c.materno AS materno_cliente,\n" +
+                        "    e.nombre AS nombre_empleado,\n" +
+                        "    e.paterno AS paterno_empleado,\n" +
+                        "    e.materno AS materno_empleado\n" +
+                        "FROM\n" +
+                        "    Servicio s\n" +
+                        "JOIN\n" +
+                        "    Clientes c ON s.idCliente = c.idCliente\n" +
+                        "JOIN\n" +
+                        "    Empleados e ON s.noPersonal = e.noPersonal\n" +
+                        "WHERE\n" +
+                        "    s.folio = %s;",folioP);
+            }
+
 
             ResultSet rs= st.executeQuery(consultaFolio);
 
@@ -83,7 +106,7 @@ public class Consultas extends javax.swing.JFrame {
         }
     }
 
-    private void extraerVista(int folio) {
+    private void extraerVista(String folio) {
         // Load the MySQL JDBC driver
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -98,7 +121,13 @@ public class Consultas extends javax.swing.JFrame {
             // Prepare the stored procedure call
 
             Statement st= connection.createStatement();
-            String viewVistaTotalServicioCall = String.format("SELECT * FROM VistaTotalServicio WHERE FolioServicio=%d",folio);
+            String viewVistaTotalServicioCall;
+            if (folio.equals("")){
+                viewVistaTotalServicioCall="SELECT * FROM VistaTotalServicio";
+            }else{
+                viewVistaTotalServicioCall= String.format("SELECT * FROM VistaTotalServicio WHERE FolioServicio=%s",folio);
+            }
+
             ResultSet rs= st.executeQuery(viewVistaTotalServicioCall);
 
             // Check if the result set is empty
@@ -187,6 +216,7 @@ public class Consultas extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
+        jButton3=new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox<>();
         jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -211,6 +241,16 @@ public class Consultas extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("Atras");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+
+
+
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Opciones disponibles", "Total de servicios", "Servicios cliente", "Empleados sin servicios" }));
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -224,33 +264,39 @@ public class Consultas extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addContainerGap(18, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jTextField1))
+                                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                .addComponent(jButton1)
-                                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(jTextField1))
-                                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(17, 17, 17))
+                                        .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addContainerGap())
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addContainerGap(17, Short.MAX_VALUE)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(15, 15, 15))
         );
         jPanel1Layout.setVerticalGroup(
                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jButton1)
-                                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel1))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButton3))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButton1))
+                                .addGap(18, 18, 18)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 366, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -365,14 +411,21 @@ public class Consultas extends javax.swing.JFrame {
         DefaultTableModel tblModel=(DefaultTableModel) jTable2.getModel();
         tblModel.setRowCount(0);
 
-        if (jComboBox1.getSelectedItem().equals("Total de servicios")){
-            extraerVista(Integer.parseInt(jTextField1.getText()));
-        } else if (jComboBox1.getSelectedItem().equals("Servicios cliente")) {
-            extraerFolios(Integer.parseInt(jTextField1.getText()));
-        } else if (jComboBox1.getSelectedItem().equals("Empleados sin servicios")) {
-            extraerFlojos();
-        }
+            if (jComboBox1.getSelectedItem().equals("Total de servicios")){
+                extraerVista(jTextField1.getText());
+            } else if (jComboBox1.getSelectedItem().equals("Servicios cliente")) {
+                extraerFolios(jTextField1.getText());
+            } else if (jComboBox1.getSelectedItem().equals("Empleados sin servicios")) {
+                extraerFlojos();
+            }
 
+
+
+    }
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt){
+        new Main(nombre);
+        dispose();
     }
 
     /**
@@ -382,13 +435,14 @@ public class Consultas extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Consultas().setVisible(true);
+                new Consultas("Test User").setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton3;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

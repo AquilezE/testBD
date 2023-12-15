@@ -134,15 +134,3 @@ GROUP BY
     s.folio, s.fecha, s.idCliente, s.noPersonal;
 
 
-ALTER TABLE tabla1
-DROP COLUMN columna2;
-
-ALTER TABLE tabla1
-MODIFY COLUMN columna3 VARCHAR(20);
-
-ALTER TABLE tabla1
-RENAME COLUMN columna2 TO nueva_columna;
-
-ALTER TABLE tabla1
-ADD COLUMN nueva_columna DECIMAL(10, 2);
-

@@ -6,10 +6,7 @@
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 
 /**
@@ -39,7 +36,7 @@ public class CrearCliente extends javax.swing.JFrame {
     String pLocalidad;
     String pTelefono;
 
-    private void ejecutarProcedimientoAlmacenado(String paterno, String materno, String nombre, String calle, String colonia, String localidad, String telefono) {
+    private void insertarCliente(String paterno, String materno, String nombre, String calle, String colonia, String localidad, String telefono) {
         // Load the MySQL JDBC driver
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -51,20 +48,27 @@ public class CrearCliente extends javax.swing.JFrame {
 
         // Establish a connection to the database
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            // Prepare the stored procedure call
-            String storedProcedureCall = "{CALL InsertarCliente(?, ?, ?, ?, ?, ?, ?)}";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(storedProcedureCall)) {
-                // Set the parameters
-                preparedStatement.setString(1, paterno);
-                preparedStatement.setString(2, materno);
-                preparedStatement.setString(3, nombre);
-                preparedStatement.setString(4, calle);
-                preparedStatement.setString(5, colonia);
-                preparedStatement.setString(6, localidad);
-                preparedStatement.setString(7, telefono);
+            // Prepare the statement for insertion
+            String insertStatement = "INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertStatement)) {
 
-                // Execute the stored procedure
-                preparedStatement.execute();
+                // Check if the client already exists
+                if (clienteYaExiste(connection, paterno, materno, nombre)) {
+                    JOptionPane.showMessageDialog(null, "Este Cliente Ya existe", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // Set the parameters
+                    preparedStatement.setString(1, paterno);
+                    preparedStatement.setString(2, materno);
+                    preparedStatement.setString(3, nombre);
+                    preparedStatement.setString(4, calle);
+                    preparedStatement.setString(5, colonia);
+                    preparedStatement.setString(6, localidad);
+                    preparedStatement.setString(7, telefono);
+
+                    // Execute the insertion
+                    preparedStatement.executeUpdate();
+
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,9 +76,18 @@ public class CrearCliente extends javax.swing.JFrame {
         }
     }
 
-
-
-
+    private boolean clienteYaExiste(Connection connection, String paterno, String materno, String nombre) throws SQLException {
+        // Check if the client already exists
+        String query = "SELECT 1 FROM Clientes WHERE paterno = ? AND materno = ? AND nombre = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, paterno);
+            preparedStatement.setString(2, materno);
+            preparedStatement.setString(3, nombre);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -125,47 +138,7 @@ public class CrearCliente extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(242,242,242));
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
 
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
-
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
-            }
-        });
-
-        jTextField4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField4ActionPerformed(evt);
-            }
-        });
-
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
-            }
-        });
-
-        jTextField6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField6ActionPerformed(evt);
-            }
-        });
-
-        jTextField7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField7ActionPerformed(evt);
-            }
-        });
 
         jLabel2.setText("Teléfono de contacto");
 
@@ -288,56 +261,32 @@ public class CrearCliente extends javax.swing.JFrame {
         pack();
     }// </editor-fold>
 
-
-
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {
-        pPaterno=jTextField1.getText();
-    }
-
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {
-        pMaterno=jTextField2.getText();
-    }
-
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {
-        pNombre=jTextField3.getText();
-    }
-
-    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {
-        pCalle=jTextField4.getText();
-    }
-
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {
-        pColonia=jTextField5.getText();
-    }
-
-    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {
-        pLocalidad=jTextField6.getText();
-    }
-
-    private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {
-        pTelefono=jTextField7.getText();
-    }
-
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-        pPaterno=jTextField1.getText();
-        pMaterno=jTextField2.getText();
-        pNombre=jTextField3.getText();
-        pCalle=jTextField4.getText();
-        pColonia=jTextField5.getText();
-        pLocalidad=jTextField6.getText();
-        pTelefono=jTextField7.getText();
-
-        ejecutarProcedimientoAlmacenado(pPaterno,pMaterno,pNombre,pCalle,pColonia,pLocalidad,pTelefono);
-
-        jTextField1.setText("");
-        jTextField2.setText("");
-        jTextField3.setText("");
-        jTextField4.setText("");
-        jTextField5.setText("");
-        jTextField6.setText("");
-        jTextField7.setText("");
+        pPaterno = jTextField1.getText();
+        pMaterno = jTextField2.getText();
+        pNombre = jTextField3.getText();
+        pCalle = jTextField4.getText();
+        pColonia = jTextField5.getText();
+        pLocalidad = jTextField6.getText();
+        pTelefono = jTextField7.getText();
 
 
+        if (pPaterno.isEmpty() || pMaterno.isEmpty() || pNombre.isEmpty() || pCalle.isEmpty()
+                || pColonia.isEmpty() || pLocalidad.isEmpty() || pTelefono.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Todos los campos deben estar llenos", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            // Todos los campos están llenos, ejecutar la inserción
+            insertarCliente(pPaterno, pMaterno, pNombre, pCalle, pColonia, pLocalidad, pTelefono);
+
+            // Limpiar los campos después de la inserción
+            jTextField1.setText("");
+            jTextField2.setText("");
+            jTextField3.setText("");
+            jTextField4.setText("");
+            jTextField5.setText("");
+            jTextField6.setText("");
+            jTextField7.setText("");
+        }
     }
 
 

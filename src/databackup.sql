@@ -20,12 +20,20 @@ INSERT INTO Usuarios (usuario, contrasenia) VALUES
 ('sofia654', 'claveSofia654');
 
 
-CALL InsertarCliente('Hernandez', 'Gomez', 'Carlos', 'Reforma', 'Juarez', 'CDMX', '5551234567');
-CALL InsertarCliente('Gonzalez', 'Mendoza', 'Laura', 'Insurgentes', 'Condesa', 'CDMX', '5559876543');
-CALL InsertarCliente('Torres', 'Lopez', 'Maria', 'Carne asada', 'Fundidora', 'Mty', '5555555555');
-CALL InsertarCliente('Sanchez', 'Garcia', 'Luis', 'Zaragoza', 'Del Valle', 'GDL', '5556667777');
-CALL InsertarCliente('Ramirez', 'Martinez', 'Carmen', 'Madero', 'Centro', 'Puebla', '5554443333');
+INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+VALUES ('Hernandez', 'Gomez', 'Carlos', 'Reforma', 'Juarez', 'CDMX', '5551234567');
 
+INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+VALUES ('Gonzalez', 'Mendoza', 'Laura', 'Insurgentes', 'Condesa', 'CDMX', '5559876543');
+
+INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+VALUES ('Torres', 'Lopez', 'Maria', 'Carne asada', 'Fundidora', 'Mty', '5555555555');
+
+INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+VALUES ('Sanchez', 'Garcia', 'Luis', 'Zaragoza', 'Del Valle', 'GDL', '5556667777');
+
+INSERT INTO Clientes (paterno, materno, nombre, calle, colonia, localidad, telefono)
+VALUES ('Ramirez', 'Martinez', 'Carmen', 'Madero', 'Centro', 'Puebla', '5554443333');
 
 INSERT INTO Prendas (prenda, costoPlancha, costoTinto) VALUES
 ('Camisa', 10.5, 15.0),
